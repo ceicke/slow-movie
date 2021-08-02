@@ -43,6 +43,7 @@ print('VCOM set to', display.epd.get_vcom())
 defaultIncrement = 4
 defaultDelay = 120
 defaultContrast = 1.0
+defaultBrightness = 1.0
 defaultDirectory = "Videos"
 
 # Compatible video file-extensions
@@ -206,6 +207,7 @@ parser.add_argument("-d", "--delay", default=defaultDelay, type=int, help="delay
 parser.add_argument("-i", "--increment", default=defaultIncrement, type=int, help=f"advance INCREMENT frames each refresh (default: {defaultDirectory})")
 parser.add_argument("-s", "--start", type=int, help="start playing at a specific frame")
 parser.add_argument("-c", "--contrast", default=defaultContrast, type=float, help="adjust image contrast (default: %(default)s)")
+parser.add_argument("-b", "--brightness", default=defaultBrightness, type=float, help="adjust image brightness (default: %(default)s)")
 parser.add_argument("-l", "--loop", action="store_true", help="loop a single video; otherwise play through the files in the videos directory")
 parser.add_argument("--service", action="store_true", help=configargparse.SUPPRESS)
 args = parser.parse_args()
