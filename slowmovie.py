@@ -298,95 +298,95 @@ if not args.random_frames:
 # Initialize lastVideo so that first time through the loop, we'll print "Playing x"
 lastVideo = None
 
-while True:
-    if lastVideo != currentVideo:
-        # Print a message when starting a new video
-        print(f"Playing '{videoFilename}'")
-        print(f"Video info: {videoInfo['frame_count']} frames, {videoInfo['fps']:.3f}fps, duration: {videoInfo['duration']}s")
-        if not args.service and not args.random_frames:
-            print(f"This video will take {estimate_runtime(args.delay, args.increment, videoInfo['frame_count'])} to play.")
-        lastVideo = currentVideo
 
-    # Note the time when starting to display so later we can sleep for the delay value minus how long this takes
-    timeStart = time.perf_counter()
+if lastVideo != currentVideo:
+    # Print a message when starting a new video
+    print(f"Playing '{videoFilename}'")
+    print(f"Video info: {videoInfo['frame_count']} frames, {videoInfo['fps']:.3f}fps, duration: {videoInfo['duration']}s")
+    if not args.service and not args.random_frames:
+        print(f"This video will take {estimate_runtime(args.delay, args.increment, videoInfo['frame_count'])} to play.")
+    lastVideo = currentVideo
 
-    #epd.init()
-    if not args.service:
-        print(f'Init...')
-    display.epd.run()
+# Note the time when starting to display so later we can sleep for the delay value minus how long this takes
+timeStart = time.perf_counter()
 
-    if not args.service:
-        print(f'Clearing display...')
-    # clearing image to white
-    display.clear()
+#epd.init()
+if not args.service:
+    print(f'Init...')
+display.epd.run()
 
-    if args.random_frames:
-        currentFrame = random.randint(0, videoInfo["frame_count"])
+if not args.service:
+    print(f'Clearing display...')
+# clearing image to white
+display.clear()
 
-    msTimecode = "%dms" % (currentFrame * videoInfo["frame_time"])
+if args.random_frames:
+    currentFrame = random.randint(0, videoInfo["frame_count"])
 
-    # Use ffmpeg to extract a frame from the movie, letterbox/pillarbox it, and put it in memory as frame.bmp
-    generate_frame(currentVideo, "/dev/shm/frame.bmp", msTimecode)
+msTimecode = "%dms" % (currentFrame * videoInfo["frame_time"])
 
-    # Open frame.bmp in PIL
-    pil_im = Image.open("/dev/shm/frame.bmp")
+# Use ffmpeg to extract a frame from the movie, letterbox/pillarbox it, and put it in memory as frame.bmp
+generate_frame(currentVideo, "/dev/shm/frame.bmp", msTimecode)
 
-    # Adjust contrast if specified
-    if args.contrast != 1:
-        enhancer = ImageEnhance.Contrast(pil_im)
-        pil_im = enhancer.enhance(args.contrast)
+# Open frame.bmp in PIL
+pil_im = Image.open("/dev/shm/frame.bmp")
 
-    # TODO: this should be built-in
-    dims = (display.width, display.height)
+# Adjust contrast if specified
+if args.contrast != 1:
+    enhancer = ImageEnhance.Contrast(pil_im)
+    pil_im = enhancer.enhance(args.contrast)
 
-    pil_im.thumbnail(dims)
+# TODO: this should be built-in
+dims = (display.width, display.height)
 
-    paste_coords = [dims[i] - pil_im.size[i] for i in (0,1)]  # align image with bottom of display
+pil_im.thumbnail(dims)
 
-    # Display the image
-    if not args.service:
-        print(f"Displaying frame {int(currentFrame)} of {videoFilename} ({(currentFrame/videoInfo['frame_count'])*100:.1f}%)")
-    #epd.display(epd.getbuffer(pil_im))
-    display.frame_buf.paste(pil_im, paste_coords)
+paste_coords = [dims[i] - pil_im.size[i] for i in (0,1)]  # align image with bottom of display
 
-    display.draw_full(constants.DisplayModes.GC16)
+# Display the image
+if not args.service:
+    print(f"Displaying frame {int(currentFrame)} of {videoFilename} ({(currentFrame/videoInfo['frame_count'])*100:.1f}%)")
+#epd.display(epd.getbuffer(pil_im))
+display.frame_buf.paste(pil_im, paste_coords)
 
-    # Increment the position
-    if not args.random_frames:
-        currentFrame += args.increment
-        # If it's the end of the video
-        if currentFrame > videoInfo["frame_count"]:
-            if not args.loop:
-                if args.random_file:
-                    # Pick a new random video
-                    currentVideo = get_random_video(viddir)
-                else:
-                    # Update currently playing video to be the next one in the Videos directory
-                    currentVideo = get_next_video(viddir, videoFilename)
+display.draw_full(constants.DisplayModes.GC16)
 
-                # Note new video in nowPlaying file
-                with open("nowPlaying", "w") as file:
-                    file.write(os.path.abspath(currentVideo))
+# Increment the position
+if not args.random_frames:
+    currentFrame += args.increment
+    # If it's the end of the video
+    if currentFrame > videoInfo["frame_count"]:
+        if not args.loop:
+            if args.random_file:
+                # Pick a new random video
+                currentVideo = get_random_video(viddir)
+            else:
+                # Update currently playing video to be the next one in the Videos directory
+                currentVideo = get_next_video(viddir, videoFilename)
 
-                # Update logfile location
-                logfile = os.path.join(logdir, videoFilename + ".progress")
-                # Update videoFilepath for new video
-                videoFilename = os.path.basename(currentVideo)
-                # Update video info for new video
-                videoInfo = video_info(currentVideo)
+            # Note new video in nowPlaying file
+            with open("nowPlaying", "w") as file:
+                file.write(os.path.abspath(currentVideo))
 
-            # Reset frame to 0 (this restarts the same video if looping)
-            currentFrame = 0
+            # Update logfile location
+            logfile = os.path.join(logdir, videoFilename + ".progress")
+            # Update videoFilepath for new video
+            videoFilename = os.path.basename(currentVideo)
+            # Update video info for new video
+            videoInfo = video_info(currentVideo)
 
-        # Log the new location in the proper logfile
-        with open(logfile, "w") as log:
-            log.write(str(currentFrame))
+        # Reset frame to 0 (this restarts the same video if looping)
+        currentFrame = 0
 
-    #epd.sleep()
-    if not args.service:
-        print(f'Sleeping display...')
-    display.epd.sleep()
+    # Log the new location in the proper logfile
+    with open(logfile, "w") as log:
+        log.write(str(currentFrame))
 
-    # Adjust sleep delay to account for the time since we started updating this frame.
-    timeDiff = time.perf_counter() - timeStart
-    time.sleep(max(args.delay - timeDiff, 0))
+#epd.sleep()
+if not args.service:
+    print(f'Sleeping display...')
+display.epd.sleep()
+
+# Adjust sleep delay to account for the time since we started updating this frame.
+#timeDiff = time.perf_counter() - timeStart
+#time.sleep(max(args.delay - timeDiff, 0))
