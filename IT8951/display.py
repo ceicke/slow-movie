@@ -30,9 +30,9 @@ class AutoDisplay:
 
         self.display_dims = (width, height)
         if rotate in ('CW', 'CCW'):
-            self.frame_buf = Image.new('L', (height, width), 0xFF)
+            self.frame_buf = Image.new('L', (height, width), 0x00)
         else:
-            self.frame_buf = Image.new('L', (width, height), 0xFF)
+            self.frame_buf = Image.new('L', (width, height), 0x00)
 
         # keep track of what we have updated,
         # so that we can automatically do partial updates of only the
