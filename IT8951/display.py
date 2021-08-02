@@ -141,8 +141,8 @@ class AutoDisplay:
         '''
         Clear display, device image buffer, and frame buffer (e.g. at startup)
         '''
-        # set frame buffer to all white
-        self.frame_buf.paste(0xFF, box=(0, 0, self.width, self.height))
+        # set frame buffer to all black
+        self.frame_buf.paste(0x00, box=(0, 0, self.width, self.height))
         self.draw_full(DisplayModes.INIT)
 
     @classmethod
