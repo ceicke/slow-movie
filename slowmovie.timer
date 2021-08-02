@@ -1,0 +1,10 @@
+[Unit]
+Description=Slow Movie Player Timer
+
+[Timer]
+OnUnitActiveSec=1m
+AccuracySec=10s
+Unit=slowmovie.service
+
+[Install]
+WantedBy=default.target

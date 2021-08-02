@@ -3,8 +3,9 @@ Description=Slow Movie Player Service
 
 [Service]
 User=pi
+Type=oneshot
 WorkingDirectory=/home/pi/slow-movie
-ExecStart=/usr/bin/python3 /home/pi/slow-movie/slowmovie.py --service 
+ExecStart=/usr/bin/python3 /home/pi/slow-movie/slowmovie.py --service
 
 [Install]
 WantedBy=multi-user.target
