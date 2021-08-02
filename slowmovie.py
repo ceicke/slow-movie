@@ -315,11 +315,6 @@ if not args.service:
     print(f'Init...')
 display.epd.run()
 
-if not args.service:
-    print(f'Clearing display...')
-# clearing image to white
-display.clear()
-
 if args.random_frames:
     currentFrame = random.randint(0, videoInfo["frame_count"])
 
@@ -327,6 +322,11 @@ msTimecode = "%dms" % (currentFrame * videoInfo["frame_time"])
 
 # Use ffmpeg to extract a frame from the movie, letterbox/pillarbox it, and put it in memory as frame.bmp
 generate_frame(currentVideo, "/dev/shm/frame.bmp", msTimecode)
+
+if not args.service:
+    print(f'Clearing display...')
+# clearing image to white
+display.clear()
 
 # Open frame.bmp in PIL
 pil_im = Image.open("/dev/shm/frame.bmp")
